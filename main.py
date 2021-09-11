@@ -68,7 +68,7 @@ def clear_big_rows(rows, heads):
 def advanced_operation(table):
     new_table = []
     dict_to_sum = {}
-    for row in table:
+    for row in table:  # {D1: a, D2: b, D3: c, M1: 1, M2: 2, M3: 3}
         firstD = row['D1']
         secondD = row['D2']
         thirdD = row['D3']
@@ -81,7 +81,7 @@ def advanced_operation(table):
         else:
             for i in range(len(dict_to_sum[t_key])):
                 dict_to_sum[t_key][i] += int(values_to_sum[i])
-    for key in dict_to_sum: # {abc: [1, 2, 3]}
+    for key in dict_to_sum:  # {abc: [1, 2, 3]}
         new_row = {}
         for i, d in enumerate(key):
             new_row[f'D{i+1}'] = d
