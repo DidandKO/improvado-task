@@ -31,8 +31,8 @@ def get_info_xml(current_file):
         return xml_result
 
 
-def create_basic_tsv(table, fieldnames):
-    with open(os.path.join(RESULT_FOLDER, 'basic_result.tsv'), 'w', newline='') as tsv_file:
+def create_tsv(table, fieldnames, file_name):
+    with open(os.path.join(RESULT_FOLDER, file_name), 'w', newline='') as tsv_file:
         dialect = csv.Dialect
         dialect.delimiter = '\t'
         dialect.other_param = 'val'
@@ -65,6 +65,33 @@ def clear_big_rows(rows, heads):
     return rows
 
 
+def advanced_operation(table):
+    new_table = []
+    dict_to_sum = {}
+    for row in table:
+        firstD = row['D1']
+        secondD = row['D2']
+        thirdD = row['D3']
+        t_key = f'{firstD}{secondD}{thirdD}'
+        values_to_sum = [row['M1'], row['M2'], row['M3']]
+        if t_key not in dict_to_sum:
+            dict_to_sum[t_key] = []
+            for value in values_to_sum:
+                dict_to_sum[t_key].append(int(value))
+        else:
+            for i in range(len(dict_to_sum[t_key])):
+                dict_to_sum[t_key][i] += int(values_to_sum[i])
+    for key in dict_to_sum: # {abc: [1, 2, 3]}
+        new_row = {}
+        for i, d in enumerate(key):
+            new_row[f'D{i+1}'] = d
+        for i, m in enumerate(dict_to_sum[key]):
+            new_row[f'MS{i+1}'] = m
+        new_table.append(new_row)
+    new_table = sorted(new_table, key=lambda x: (x['D1'], x['D2']))
+    return new_table
+
+
 if __name__ == '__main__':
     table_to_tsv = []
     file_list = os.listdir(SOURCE_ROOT)
@@ -84,7 +111,10 @@ if __name__ == '__main__':
             table_to_tsv.append(s_row)
         else:
             print('Неизвестный формат файла')
-    headers = find_common_keys(table_to_tsv)
+    headers = sorted(find_common_keys(table_to_tsv))
     clear_big_rows(table_to_tsv, headers)
     table_to_tsv = sorted(table_to_tsv, key=lambda x: x['D1'])
-    create_basic_tsv(table_to_tsv, sorted(headers))
+    create_tsv(table_to_tsv, headers, 'basic_result.tsv')
+    table_to_tsv = advanced_operation(table_to_tsv)
+    advanced_headers = ['D1', 'D2', 'D3', 'MS1', 'MS2', 'MS3']
+    create_tsv(table_to_tsv, advanced_headers, 'advanced_result.tsv')
